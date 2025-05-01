@@ -18,7 +18,7 @@ function InfoSection({ trip }) {
               <FaShareSquare className="text-white" />
             </button>
           </div>
-          <div className="flex gap-3 text-base font-medium text-[#40517b]">
+          <div className="flex gap-3 text-xs font-medium text-[#40517b]">
             <h2 className="p-1 px-3 bg-[#dce7ff] rounded-xl">
               {trip?.userPreference?.days} Days
             </h2>

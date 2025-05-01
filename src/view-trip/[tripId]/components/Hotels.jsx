@@ -34,7 +34,9 @@ function Hotels({ trip }) {
                   <p className="text-sm font-medium text-[#495a83]">
                     💰{hotel.price}
                   </p>
-                  <p className="text-sm text-[#495a83]]">⭐️{hotel.rating}</p>
+                  <p className="text-sm text-[#495a83]">
+                    ⭐️Rating: {hotel.rating}
+                  </p>
                   {/* <p className="text-sm text-[#7082ac]">
                       Geo: {hotel.geoCoordinates}
                     </p> */}
