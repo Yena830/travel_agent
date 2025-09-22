@@ -232,12 +232,41 @@ function Profile() {
 
   const formatDate = (timestamp) => {
     if (!timestamp) return 'Unknown date';
-    const date = new Date(parseInt(timestamp));
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    
+    // Handle Firestore timestamp objects
+    if (timestamp && typeof timestamp === 'object' && timestamp.toDate) {
+      const date = timestamp.toDate();
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+    
+    // Handle numeric timestamps
+    if (typeof timestamp === 'number') {
+      const date = new Date(timestamp);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+    
+    // Handle string timestamps
+    if (typeof timestamp === 'string') {
+      const date = new Date(parseInt(timestamp));
+      if (isNaN(date.getTime())) {
+        return 'Unknown date';
+      }
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+    
+    return 'Unknown date';
   };
 
   const getTripStatus = (trip) => {
@@ -464,7 +493,7 @@ function Profile() {
                             </div>
                             <div className="flex items-center">
                               <Clock className="w-4 h-4 lg:w-5 lg:h-5 mr-2 flex-shrink-0" />
-                              <span className="truncate">{formatDate(trip.id)}</span>
+                              <span className="truncate">{formatDate(trip.createdAt || trip.updatedAt)}</span>
                             </div>
                           </div>
                         </div>
