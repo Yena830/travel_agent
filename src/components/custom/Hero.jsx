@@ -62,7 +62,7 @@ function Hero() {
             </p>
             
             {/* CTA Button */}
-            <div className="pt-8">
+            <div className="pt-8 relative">
               <Link to={"/create-trip"}>
                 <button className="nj-modern-button px-8 py-4 md:px-12 md:py-5 text-lg md:text-xl">
                   <span className="relative z-10 flex items-center">
@@ -70,6 +70,15 @@ function Hero() {
                   </span>
                 </button>
               </Link>
+              
+              {/* Cat Image - positioned in bottom right */}
+              <div className="absolute -bottom-4 -right-4 sm:-bottom-4 sm:-right-0 md:-bottom-6 md:-right-6 lg:-bottom-10 lg:-right-8">
+                <img 
+                  src="/cat.png" 
+                  alt="Cute cat" 
+                  className="w-16 h-16 md:w-32 md:h-32 lg:w-40 lg:h-40 object-contain opacity-95"
+                />
+              </div>
             </div>
             
             {/* Feature Cards
