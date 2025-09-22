@@ -35,6 +35,7 @@ function CreateTrip() {
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [tripLimit, setTripLimit] = useState(null);
+  const [showGenerateDialog, setShowGenerateDialog] = useState(false);
   const navigate = useNavigate();
   const handleInputChange = (name, value) => {
     if (name == "days" && (value < 1 || value > 14)) {
@@ -116,6 +117,24 @@ function CreateTrip() {
     onSuccess: (e) => GetUserProfile(e),
     onError: (error) => console.log(error),
   });
+
+  const handleGenerateClick = () => {
+    const user = localStorage.getItem("user");
+    if (!user) {
+      setOpenDialog(true);
+      return;
+    }
+    setShowGenerateDialog(true);
+  };
+
+  const handleConfirmGenerate = () => {
+    setShowGenerateDialog(false);
+    OnGenerateTrip();
+  };
+
+  const handleCancelGenerate = () => {
+    setShowGenerateDialog(false);
+  };
 
   const OnGenerateTrip = async () => {
     const user = localStorage.getItem("user");
@@ -488,7 +507,7 @@ function CreateTrip() {
           <div className="text-center mt-12">
             <button 
               type="button"
-              onClick={OnGenerateTrip}
+              onClick={handleGenerateClick}
               className="bg-gradient-to-r from-[#153582] to-[#283593] hover:from-[#283593] hover:to-[#1A237E] text-white font-semibold py-4 px-12 rounded-full text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-lg"
               disabled={loading}
             >
@@ -528,6 +547,49 @@ function CreateTrip() {
               </div>
             </DialogDescription>
           </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      {/* Generate Trip Confirmation Dialog */}
+      <Dialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-[#153582] flex items-center gap-2">
+              <svg className="w-6 h-6 text-[#153582]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Generate Your Trip
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 mt-2">
+              Ready to create your personalized itinerary? Here's what we'll generate for you:
+              <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                <div className="font-medium text-[#153582] mb-2">Trip Summary:</div>
+                <div className="text-sm space-y-1">
+                  <div><strong>Destination:</strong> {formData.location || 'Not selected'}</div>
+                  <div><strong>Duration:</strong> {formData.days} days</div>
+                  <div><strong>Budget:</strong> ${formData.budget.toLocaleString()}</div>
+                  <div><strong>Travelers:</strong> {formData.people} people</div>
+                </div>
+              </div>
+              <div className="mt-3 text-sm">
+                This will create a detailed itinerary with attractions, hotels, and daily plans tailored to your preferences.
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 mt-6">
+            <button
+              onClick={handleCancelGenerate}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleConfirmGenerate}
+              className="flex-1 px-4 py-2 bg-[#153582] text-white rounded-lg hover:bg-[#283593] transition-colors font-medium"
+            >
+              Generate Trip
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
 

@@ -21,7 +21,7 @@ import {
   RefreshCw,
   AlertCircle
 } from 'lucide-react';
-import Footer from '../view-trip/[tripId]/components/Footer';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../components/ui/dialog';
 
 function Profile() {
   const [user, setUser] = useState(null);
@@ -30,6 +30,8 @@ function Profile() {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredTrips, setFilteredTrips] = useState([]);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [tripToDelete, setTripToDelete] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -181,40 +183,52 @@ function Profile() {
   };
 
   const deleteTrip = async (tripId) => {
-    if (window.confirm('Are you sure you want to delete this trip?')) {
-      try {
-        console.log('Deleting trip with ID:', tripId);
-        
-        if (user?.userId) {
-          // Use new structure
-          await TripService.deleteTrip(user.userId, tripId);
-        } else {
-          // Fallback to old structure
-          const { deleteDoc, doc } = await import('firebase/firestore');
-          const { db } = await import('../service/firebaseConfig');
-          await deleteDoc(doc(db, 'AITrips', tripId));
-        }
-        
-        setTrips(trips.filter(trip => trip.id !== tripId));
-        toast.success('Trip deleted successfully');
-        
-        // 触发自定义事件通知Header更新限制信息
-        if (user?.userId) {
-          const { UserService } = await import('../service/userService');
-          const updatedLimitCheck = await UserService.canGenerateTrip(user.userId);
-          window.dispatchEvent(new CustomEvent('tripLimitUpdated', { 
-            detail: { 
-              userId: user.userId, 
-              limitInfo: updatedLimitCheck 
-            } 
-          }));
-        }
-      } catch (error) {
-        console.error('Error deleting trip:', error);
-        toast.error('Delete failed: ' + error.message);
+    try {
+      console.log('Deleting trip with ID:', tripId);
+      
+      if (user?.userId) {
+        // Use new structure
+        await TripService.deleteTrip(user.userId, tripId);
+      } else {
+        // Fallback to old structure
+        const { deleteDoc, doc } = await import('firebase/firestore');
+        const { db } = await import('../service/firebaseConfig');
+        await deleteDoc(doc(db, 'AITrips', tripId));
       }
+      
+      setTrips(trips.filter(trip => trip.id !== tripId));
+      toast.success('Trip deleted successfully');
+      
+      // 触发自定义事件通知Header更新限制信息
+      if (user?.userId) {
+        const { UserService } = await import('../service/userService');
+        const updatedLimitCheck = await UserService.canGenerateTrip(user.userId);
+        window.dispatchEvent(new CustomEvent('tripLimitUpdated', { 
+          detail: { 
+            userId: user.userId, 
+            limitInfo: updatedLimitCheck 
+          } 
+        }));
+      }
+    } catch (error) {
+      console.error('Error deleting trip:', error);
+      toast.error('Delete failed: ' + error.message);
     }
   };
+
+  const handleConfirmDelete = () => {
+    if (tripToDelete) {
+      deleteTrip(tripToDelete.id);
+      setShowDeleteDialog(false);
+      setTripToDelete(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteDialog(false);
+    setTripToDelete(null);
+  };
+
 
   const formatDate = (timestamp) => {
     if (!timestamp) return 'Unknown date';
@@ -247,7 +261,6 @@ function Profile() {
             </div>
           </div>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -270,9 +283,9 @@ function Profile() {
           {/* User Info Card */}
           <div className="nj-card simple-sticker mb-8">
             <div className="p-4 md:p-8">
-              <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-6">
-                <div className="flex items-center space-x-4 md:space-x-6">
-                  <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-r from-[#153582] to-[#F48FB1] rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+              <div className="flex flex-col lg:flex-row lg:items-start space-y-4 lg:space-y-0 lg:space-x-8">
+                <div className="flex items-center space-x-4 lg:space-x-6">
+                  <div className="w-16 h-16 lg:w-24 lg:h-24 bg-gradient-to-r from-[#153582] to-[#F48FB1] rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
                     {user?.profilePicture ? (
                       <img 
                         src={`${user.profilePicture}?sz=200`} 
@@ -292,41 +305,41 @@ function Profile() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <User className="w-8 h-8 md:w-10 md:h-10 text-white" />
+                        <User className="w-8 h-8 lg:w-12 lg:h-12 text-white" />
                       </div>
                     )}
                     <div className={`w-full h-full flex items-center justify-center ${user?.profilePicture ? 'hidden' : 'flex'}`}>
-                      <User className="w-8 h-8 md:w-10 md:h-10 text-white" />
+                      <User className="w-8 h-8 lg:w-12 lg:h-12 text-white" />
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-xl md:text-2xl font-bold text-[#153582] mb-1 md:mb-2 truncate">
+                    <h2 className="text-xl lg:text-3xl font-bold text-[#153582] mb-2 lg:mb-3 truncate">
                       {user?.name || 'Traveler'}
                     </h2>
-                    <p className="text-[#576380] text-sm md:text-base mb-3 md:mb-4 truncate">{user?.email}</p>
-                    <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 md:gap-4 text-xs md:text-sm">
+                    <p className="text-[#576380] text-sm lg:text-lg mb-4 lg:mb-6 truncate">{user?.email}</p>
+                    <div className="flex flex-wrap gap-3 lg:gap-6 text-sm lg:text-base">
                       <div className="flex items-center text-[#576380]">
-                        <Globe className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2 flex-shrink-0" />
+                        <Globe className="w-4 h-4 lg:w-5 lg:h-5 mr-2 flex-shrink-0" />
                         <span className="truncate">{trips.length} trips created</span>
                       </div>
                       <div className="flex items-center text-[#576380]">
-                        <Heart className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2 flex-shrink-0" />
+                        <Heart className="w-4 h-4 lg:w-5 lg:h-5 mr-2 flex-shrink-0" />
                         <span className="truncate">Love exploring</span>
                       </div>
                       <div className="flex items-center text-[#576380]">
-                        <Star className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2 flex-shrink-0" />
+                        <Star className="w-4 h-4 lg:w-5 lg:h-5 mr-2 flex-shrink-0" />
                         <span className="truncate">{trips.length} / 10 trips used</span>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="w-full md:w-auto">
+                <div className="w-full lg:w-auto lg:flex-shrink-0">
                   <Link
                     to="/create-trip"
-                    className="nj-button-primary w-full md:w-auto"
+                    className="nj-button-primary w-full lg:w-auto"
                   >
-                    <span className="nj-button-inner block px-4 md:px-6 py-2 md:py-3 text-sm md:text-base">
-                      <Plus className="w-4 h-4 md:w-5 md:h-5 inline mr-2" />
+                    <span className="nj-button-inner block px-6 lg:px-8 py-3 lg:py-4 text-base lg:text-lg">
+                      <Plus className="w-5 h-5 lg:w-6 lg:h-6 inline mr-2" />
                       Create New Trip
                     </span>
                   </Link>
@@ -338,29 +351,29 @@ function Profile() {
           {/* Search and Filter */}
           <div className="nj-card simple-sticker mb-8">
             <div className="p-4 md:p-6">
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-6">
                 <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#576380] w-4 h-4 md:w-5 md:h-5" />
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#576380] w-5 h-5" />
                   <input
                     type="text"
                     placeholder="Search destinations..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 md:py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#153582] focus:border-transparent text-sm md:text-base"
+                    className="w-full pl-12 pr-4 py-3 lg:py-4 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#153582] focus:border-transparent text-base lg:text-lg"
                   />
                 </div>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div className="flex flex-col sm:flex-row lg:flex-row items-stretch sm:items-center lg:items-center gap-3 lg:gap-4">
                   <button
                     onClick={() => fetchUserTrips(user?.userId)}
                     disabled={loading}
-                    className="flex items-center justify-center gap-2 px-4 py-2 md:py-3 bg-[#153582] text-white rounded-full hover:bg-[#283593] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
+                    className="flex items-center justify-center gap-2 px-6 py-3 lg:py-4 bg-[#153582] text-white rounded-full hover:bg-[#283593] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base lg:text-lg font-medium"
                   >
-                    <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                    <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
                     Refresh
                   </button>
-                  <div className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-50 rounded-full">
-                    <Filter className="w-4 h-4 text-[#576380]" />
-                    <span className="text-[#576380] text-sm">
+                  <div className="flex items-center justify-center gap-2 px-6 py-3 lg:py-4 bg-gray-50 rounded-full">
+                    <Filter className="w-5 h-5 text-[#576380]" />
+                    <span className="text-[#576380] text-base lg:text-lg font-medium">
                       {filteredTrips.length} trips found
                     </span>
                   </div>
@@ -425,48 +438,51 @@ function Profile() {
                 
                 return (
                   <div key={trip.id} className="nj-card simple-sticker">
-                    <div className="p-4 md:p-6">
-                      <div className="flex flex-col gap-4">
+                    <div className="p-4 md:p-6 lg:p-8">
+                      <div className="flex flex-col lg:flex-row lg:items-start gap-4 lg:gap-6">
                         <div className="flex-1">
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
-                            <h3 className="text-lg md:text-xl font-bold text-[#153582] truncate">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-4">
+                            <h3 className="text-lg lg:text-2xl font-bold text-[#153582] truncate">
                               {trip.userPreference?.location || '未知目的地'}
                             </h3>
-                            <span className={`px-2 md:px-3 py-1 rounded-full text-xs font-semibold ${status.color} self-start`}>
+                            <span className={`px-3 lg:px-4 py-1 lg:py-2 rounded-full text-xs lg:text-sm font-semibold ${status.color} self-start`}>
                               {status.text}
                             </span>
                           </div>
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-4 text-xs md:text-sm text-[#576380] mb-4">
+                          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 text-sm lg:text-base text-[#576380] mb-6">
                             <div className="flex items-center">
-                              <Calendar className="w-3 h-3 md:w-4 md:h-4 mr-1 flex-shrink-0" />
+                              <Calendar className="w-4 h-4 lg:w-5 lg:h-5 mr-2 flex-shrink-0" />
                               <span className="truncate">{trip.userPreference?.days || 0} days</span>
                             </div>
                             <div className="flex items-center">
-                              <DollarSign className="w-3 h-3 md:w-4 md:h-4 mr-1 flex-shrink-0" />
+                              <DollarSign className="w-4 h-4 lg:w-5 lg:h-5 mr-2 flex-shrink-0" />
                               <span className="truncate">${(trip.userPreference?.budget || 0).toLocaleString()}</span>
                             </div>
                             <div className="flex items-center">
-                              <Users className="w-3 h-3 md:w-4 md:h-4 mr-1 flex-shrink-0" />
+                              <Users className="w-4 h-4 lg:w-5 lg:h-5 mr-2 flex-shrink-0" />
                               <span className="truncate">{trip.userPreference?.people || 0} people</span>
                             </div>
                             <div className="flex items-center">
-                              <Clock className="w-3 h-3 md:w-4 md:h-4 mr-1 flex-shrink-0" />
+                              <Clock className="w-4 h-4 lg:w-5 lg:h-5 mr-2 flex-shrink-0" />
                               <span className="truncate">{formatDate(trip.id)}</span>
                             </div>
                           </div>
                         </div>
                         
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                        <div className="flex flex-col sm:flex-row lg:flex-col items-stretch sm:items-center lg:items-stretch gap-2 lg:gap-2 mb-4">
                           <Link
                             to={`/view-trip/${trip.id}`}
-                            className="flex-1 bg-[#153582] text-white px-4 py-2 rounded-full flex items-center justify-center gap-2 hover:bg-[#283593] transition-colors text-sm md:text-base"
+                            className="flex-1 lg:flex-none bg-[#153582] text-white px-4 lg:px-6 py-1.5 lg:py-2 rounded-full flex items-center justify-center gap-1.5 hover:bg-[#283593] transition-colors text-sm lg:text-base font-medium"
                           >
                             <Eye className="w-4 h-4" />
                             View Details
                           </Link>
                           <button
-                            onClick={() => deleteTrip(trip.id)}
-                            className="flex-1 bg-red-100 text-red-600 px-4 py-2 rounded-full flex items-center justify-center gap-2 hover:bg-red-200 transition-colors text-sm md:text-base"
+                            onClick={() => {
+                              setTripToDelete(trip);
+                              setShowDeleteDialog(true);
+                            }}
+                            className="flex-1 lg:flex-none bg-red-100 text-red-600 px-4 lg:px-6 py-1.5 lg:py-2 rounded-full flex items-center justify-center gap-1.5 hover:bg-red-200 transition-colors text-sm lg:text-base font-medium"
                           >
                             <Trash2 className="w-4 h-4" />
                             Delete
@@ -475,39 +491,39 @@ function Profile() {
                       </div>
                       
                       {/* Trip Preview */}
-                      <div className="bg-gray-50 rounded-lg p-3 md:p-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                      <div className="bg-gray-50 rounded-lg p-4 lg:p-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
                           <div>
-                            <h4 className="font-semibold text-[#153582] mb-2 flex items-center text-sm md:text-base">
-                              <MapPin className="w-3 h-3 md:w-4 md:h-4 mr-2 flex-shrink-0" />
+                            <h4 className="font-semibold text-[#153582] mb-3 flex items-center text-base lg:text-lg">
+                              <MapPin className="w-4 h-4 lg:w-5 lg:h-5 mr-2 flex-shrink-0" />
                               Trip Highlights
                             </h4>
-                            <div className="space-y-1">
+                            <div className="space-y-2">
                               {itinerary.slice(0, 3).map((day, index) => (
-                                <div key={index} className="text-xs md:text-sm text-[#576380]">
+                                <div key={index} className="text-sm lg:text-base text-[#576380]">
                                   Day {day.day}: {day.plan?.length || 0} attractions
                                 </div>
                               ))}
                               {itinerary.length > 3 && (
-                                <div className="text-xs md:text-sm text-[#F48FB1]">
+                                <div className="text-sm lg:text-base text-[#F48FB1] font-medium">
                                   +{itinerary.length - 3} more days...
                                 </div>
                               )}
                             </div>
                           </div>
                           <div>
-                            <h4 className="font-semibold text-[#153582] mb-2 flex items-center text-sm md:text-base">
-                              <Star className="w-3 h-3 md:w-4 md:h-4 mr-2 flex-shrink-0" />
+                            <h4 className="font-semibold text-[#153582] mb-3 flex items-center text-base lg:text-lg">
+                              <Star className="w-4 h-4 lg:w-5 lg:h-5 mr-2 flex-shrink-0" />
                               Hotel Recommendations
                             </h4>
-                            <div className="space-y-1">
+                            <div className="space-y-2">
                               {hotelOptions.slice(0, 2).map((hotel, index) => (
-                                <div key={index} className="text-xs md:text-sm text-[#576380] truncate">
+                                <div key={index} className="text-sm lg:text-base text-[#576380] truncate">
                                   {hotel.hotelName || `Hotel ${index + 1}`}
                                 </div>
                               ))}
                               {hotelOptions.length > 2 && (
-                                <div className="text-xs md:text-sm text-[#F48FB1]">
+                                <div className="text-sm lg:text-base text-[#F48FB1] font-medium">
                                   +{hotelOptions.length - 2} more options...
                                 </div>
                               )}
@@ -523,8 +539,46 @@ function Profile() {
           </div>
         </div>
       </div>
-      
-      <Footer />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-[#153582] flex items-center gap-2">
+              <AlertCircle className="w-6 h-6 text-red-500" />
+              Delete Trip
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 mt-2">
+              Are you sure you want to delete this trip? This action cannot be undone.
+              {tripToDelete && (
+                <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="font-medium text-[#153582]">
+                    {tripToDelete.userPreference?.location || 'Unknown Destination'}
+                  </div>
+                  <div className="text-sm text-gray-500 mt-1">
+                    {tripToDelete.userPreference?.days || 0} days • ${(tripToDelete.userPreference?.budget || 0).toLocaleString()}
+                  </div>
+                </div>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-3 mt-6">
+            <button
+              onClick={handleCancelDelete}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleConfirmDelete}
+              className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium"
+            >
+              Delete Trip
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }

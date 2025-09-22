@@ -175,7 +175,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 For questions or suggestions, please contact us through:
 
 - Project Issues: [GitHub Issues](https://github.com/yourusername/smart-trip/issues)
-- Email: your-email@example.com
+- Email: lyy0256@outlook.com
 
 ---
 

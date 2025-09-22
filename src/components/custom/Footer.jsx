@@ -56,7 +56,7 @@ function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-600 hover:text-[#153582] transition-colors">
+                <a href="mailto:lyy0256@outlook.com" className="text-gray-600 hover:text-[#153582] transition-colors">
                   Contact
                 </a>
               </li>
