@@ -78,7 +78,7 @@ function Footer() {
         {/* Bottom Section */}
         <div className="border-t border-blue-200 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <div className="text-gray-600 text-sm mb-4 md:mb-0">
-            © 2024 Smart Trip. All rights reserved.
+            © 2025 Smart Trip by Luna Lin. All rights reserved.
           </div>
           <div className="flex space-x-6 text-sm">
             <a href="#" className="text-gray-600 hover:text-[#153582] transition-colors">

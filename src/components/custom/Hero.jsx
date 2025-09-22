@@ -41,7 +41,7 @@ function Hero() {
             </div>
             
             {/* Hero Title */}
-            <div className="space-y-4 flex flex-col items-center justify-center pt-6 mt-2">
+            <div className="space-y-4 flex flex-col items-center justify-center pt-2 mt-0">
               <h1 className="nj-hero-title text-4xl md:text-6xl lg:text-7xl text-center">
                 Discover Your Next
                 <br />
