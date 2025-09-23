@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "@fontsource/black-ops-one";
 import { useGoogleLogin } from "@react-oauth/google";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { User, LogOut, Star } from "lucide-react";
 import axios from "axios";
 import { UserService } from "../../service/userService";
@@ -12,6 +12,7 @@ function Header() {
   const [tripLimit, setTripLimit] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -126,6 +127,8 @@ function Header() {
     localStorage.removeItem('user');
     setUser(null);
     setShowDropdown(false);
+    // 退出登录后自动跳转到首页
+    navigate('/');
   };
 
   // 点击外部关闭下拉菜单

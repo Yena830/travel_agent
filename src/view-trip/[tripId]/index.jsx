@@ -6,7 +6,6 @@ import InfoSection from "./components/InfoSection";
 import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 import Hotels from "./components/Hotels";
 import PlacesVisit from "./components/PlacesVisit";
-import Footer from "../../components/custom/Footer";
 import { Download, Share2, Edit, Calendar, MapPin, Star, Clock, Utensils, Camera, Bed } from "lucide-react";
 import { TripService } from "../../service/userService";
 import html2canvas from 'html2canvas';
@@ -723,8 +722,7 @@ function ViewTrip() {
         </div>
       </div>
       
-      {/*Footer*/}
-      <Footer />
+     
     </div>
   );
 }

@@ -58,7 +58,7 @@ function Hero() {
             <p className="nj-hero-subtitle text-lg md:text-xl lg:text-2xl max-w-2xl mx-auto">
               Your personal AI travel curator, creating custom itineraries 
               <br className="hidden md:block" />
-              <span className="doodle-highlight">tailored to your dreams and budget</span>
+              <span className="doodle-highlight"> tailored to your dreams and budget</span>
             </p>
             
             {/* CTA Button */}
